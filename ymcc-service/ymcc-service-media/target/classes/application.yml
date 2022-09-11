@@ -1,0 +1,48 @@
+server:
+  port: 10080
+
+spring:
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password:
+    jedis:
+      pool:
+        max-wait: 2000ms
+        min-idle: 2
+        max-idle: 8
+  application:
+    name: service-media
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  # 配置数据源
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql:///ymcc-media?serverTimezone=UTC
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource # 指定连接池
+mybatis-plus:
+  mapper-locations: classpath:cn/itsource/mapper/*Mapper.xml  # 扫描mapper.xml
+# type-aliases-package: cn.itsource.domain 不用别名效率高
+
+media:
+  upload-base-dir: "C:/Users/blank/Desktop/test" #分片上传地址
+  #oad‐location: "d:/"  #合并之后的视频文件存储地址
+  ffmpeg‐path: "D:/itEnvironment/ffmpeg/bin/ffmpeg.exe" #ffmpeg视频工具安装地址
+  rtmp: "rtmp://115.159.88.63:1935/live/" #推流到云服务器的地址
+  play: "http://115.159.88.63:8080/live/" #播放地址
+
+
+
+
+
+
+
+
+
+
+

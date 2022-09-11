@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>ymcc-service</artifactId>
+        <groupId>cn.itsource</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>ymcc-service-system</artifactId>
+
+    <dependencies>
+
+        <!--依赖自己模块的pojo，同时间接依赖了itsource-basic-common-->
+        <dependency>
+            <groupId>cn.itsource</groupId>
+            <artifactId>ymcc-pojo-system</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!--依赖service公共依赖服务-->
+        <dependency>
+            <groupId>cn.itsource</groupId>
+            <artifactId>ymcc-basic-dependency</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
+
+
+</project>

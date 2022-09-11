@@ -1,0 +1,60 @@
+server:
+  port: 10050
+
+spring:
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password:
+    jedis:
+      pool:
+        max-wait: 2000ms
+        min-idle: 2
+        max-idle: 8
+  application:
+    name: service-common
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  # 配置数据源
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql:///ymcc-common?serverTimezone=UTC
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource # 指定连接池
+mybatis-plus:
+  mapper-locations: classpath:cn/itsource/mapper/*Mapper.xml  # 扫描mapper.xml
+# type-aliases-package: cn.itsource.domain 不用别名效率高
+
+
+
+verifycode:
+  smsregister:
+    interval: 60000
+    codesize: 6
+    validityperiod: 300000
+    content: "亲爱的用户，您的短信验证码为：%S, 请在5分钟内使用！"
+    title: "注册验证码"
+
+
+file:
+  alicloud:
+    bucket-name: java0412-itsource #上传空间bucket
+    access-key: LTAI5tHC1wBEt4RZVY7bhXGx #你的key
+    secret-key: YeqQrW6FfrRoNBWH3RXeJnn3VXKX25 #你的秘钥
+    endpoint: oss-cn-chengdu.aliyuncs.com  #上传端点
+    dir: "director" # 用户上传文件时的文件路径前缀
+
+
+
+
+
+
+
+
+
+
+

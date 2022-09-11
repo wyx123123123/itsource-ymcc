@@ -1,0 +1,11 @@
+spring:
+  profiles:
+    active: dev # 环境
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848 # 注册中心地址
+        prefix: application-media # 配置前缀
+        file-extension: yaml # 配置后缀
+        group: DEFAULT_GROUP # 默认分组
+        namespace: 84452c01-3e91-4583-ae8e-be2001ae7ee4 # 命名空间

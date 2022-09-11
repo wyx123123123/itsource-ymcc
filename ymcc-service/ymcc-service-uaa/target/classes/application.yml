@@ -1,0 +1,26 @@
+server:
+  port: 10030
+
+spring:
+  application:
+    name: service-uaa
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+    alibaba:
+      seata:
+        tx-service-group: fsp_tx_group #这里和file.conf中事务组名一样
+  # 配置数据源
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql:///ymcc-uaa?serverTimezone=UTC
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource # 指定连接池
+mybatis-plus:
+  mapper-locations: classpath:cn/itsource/mapper/*Mapper.xml  # 扫描mapper.xml
+# type-aliases-package: cn.itsource.domain 不用别名效率高
+
+seata:
+  enableAutoDataSourceProxy: false #关闭DataSource代理的自动配置，我们要手动配置

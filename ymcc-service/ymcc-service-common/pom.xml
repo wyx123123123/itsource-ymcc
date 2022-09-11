@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>ymcc-service</artifactId>
+        <groupId>cn.itsource</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>ymcc-service-common</artifactId>
+
+
+    <dependencies>
+
+        <!--依赖自己模块的pojo，同时间接依赖了itsource-basic-common-->
+        <dependency>
+            <groupId>cn.itsource</groupId>
+            <artifactId>ymcc-pojo-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!--依赖service公共依赖服务-->
+        <dependency>
+            <groupId>cn.itsource</groupId>
+            <artifactId>ymcc-basic-dependency</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+
+        <!--整合Redis , 底层可以用jedis-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <!--排除redis默认的java开发客户端依赖，因为高并发情况下会有内存溢出问题，我们使用jedis来操作Java-->
+            <exclusions>
+                <exclusion>
+                    <groupId>io.lettuce</groupId>
+                    <artifactId>lettuce-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--引入redis的java客户端包，jedis依赖-->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
+
+        <!--阿里云对象存储依赖-->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.15.0</version>
+        </dependency>
+
+    </dependencies>
+
+</project>
