@@ -1,0 +1,24 @@
+server:
+  port: 10080
+
+spring:
+  elasticsearch:
+    rest:
+      uris: http://localhost:9200
+  application:
+    name: service-search
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
+
+
+
+
+
+
+
+
+
+

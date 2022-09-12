@@ -15,4 +15,10 @@ import com.baomidou.mybatisplus.service.IService;
 public interface ICourseService extends IService<Course> {
 
     void save(CourseDto courseDto);
+
+    /**
+     * 发布课程
+     * @param courseId
+     */
+    void onLineCourse(Long courseId);
 }

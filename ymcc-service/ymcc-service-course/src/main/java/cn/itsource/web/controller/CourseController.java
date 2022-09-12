@@ -22,6 +22,17 @@ public class CourseController {
     public ICourseService courseService;
 
     /**
+     * 发布课程
+     * @return
+     */
+    @RequestMapping(value="/onLineCourse/{courseId}",method= RequestMethod.POST)
+    public JsonResult onLineCourse(@PathVariable("courseId") Long courseId){
+        courseService.onLineCourse(courseId);
+        return JsonResult.success();
+    }
+
+
+    /**
     * 保存和修改公用的
     */
     @RequestMapping(value="/save",method= RequestMethod.POST)

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -93,6 +94,8 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         courseTypeService.updateTotalCountById(course.getCourseTypeId());
     }
 
+
+
     private void saveCourseTeacher(Course course, List<Long> teacherIds) {
         //teacherIds.forEach(id->{
         //    CourseTeacher courseTeacher = new CourseTeacher();
@@ -156,4 +159,43 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         Course selectCourse = selectOne(wrapper);
         AssertUtil.isNull(selectCourse, GlobalEnumCode.COURSE_EXISTED_ERROR);
     }
+
+
+    /**
+     *
+     * 1.参数校验
+     * 2.业务校验
+     *   课程必须存在
+     *   课程状态必须是下架状态
+     * 3.修改课程状态（上架）+ 填写上架时间
+     * 4.将课程通过Feign 调用service-search保存到Es中
+     *   。为service-search服务编写Controller接口，保存数据到Es中
+     *   。编写search-api，讲search服务的controller接口暴露成Feign接口
+     *   。service-course服务中使用search-api 去调用search服务，完成数据保存到Es
+     * @param courseId
+     */
+    @Override
+    public void onLineCourse(Long courseId) {
+        // 1.参数校验
+        AssertUtil.isNotNull(courseId,"小子想搞事？？ 哥屋恩！！");
+        // 2.业务校验
+        Course course = selectById(courseId);
+        //   课程必须存在
+        AssertUtil.isNotNull(course,"课程不存在！！");
+        //   课程状态必须是下架状态
+        boolean isOffline = course.getStatus() == Course.STATUS_OFFLINE;
+        AssertUtil.isTrue(isOffline,"课程状态非法！！");
+        // 3.修改课程状态（上架）+ 填写上架时间
+        course.setStatus(Course.STATUS_ONLINE);
+        course.setOnlineTime(new Date());
+        updateById(course);
+        // 4.将课程通过Feign 调用service-search保存到Es中
+        //   。为service-search服务编写Controller接口，保存数据到Es中
+        //   。编写search-api，讲search服务的controller接口暴露成Feign接口
+        //   。service-course服务中使用search-api 去调用search服务，完成数据保存到Es
+
+    }
+
+
+
 }

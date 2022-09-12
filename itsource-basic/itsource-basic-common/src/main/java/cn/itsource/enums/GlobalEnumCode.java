@@ -28,7 +28,11 @@ public enum GlobalEnumCode {
 
 
     // course服务异常以600XX开头
-    COURSE_EXISTED_ERROR("课程已存在！", "60001");
+    COURSE_EXISTED_ERROR("课程已存在！", "60001"),
+    COURSE_NOTEXIST_ERROR("小子想搞事？？ 哥屋恩！！", "60002");
+
+
+
 
 
     private String errorMessage;

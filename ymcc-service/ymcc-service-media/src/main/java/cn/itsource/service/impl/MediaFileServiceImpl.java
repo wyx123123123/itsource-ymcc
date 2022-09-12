@@ -2,6 +2,7 @@ package cn.itsource.service.impl;
 
 import cn.itsource.domain.MediaFile;
 import cn.itsource.mapper.MediaFileMapper;
+import cn.itsource.mq.producer.MediaProducer;
 import cn.itsource.result.JsonResult;
 import cn.itsource.service.IMediaFileService;
 import cn.itsource.utils.HlsVideoUtil;
@@ -12,6 +13,7 @@ import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,8 +38,8 @@ public class MediaFileServiceImpl extends ServiceImpl<MediaFileMapper, MediaFile
     @Autowired
     private MediaFileMapper mediaFileMapper;
 
-    //@Autowired
-    //private MediaProducer mediaProducer;
+    @Autowired
+    private MediaProducer mediaProducer;
 
     /**
      * 配置
@@ -147,9 +149,14 @@ public class MediaFileServiceImpl extends ServiceImpl<MediaFileMapper, MediaFile
 
         // 文件上传到视频服务器做 断点续播
         //boolean success = true ; //mediaProducer.synSend(mediaFile);
-        JsonResult jsonResult = handleFile2m3u8(mediaFile);
+        //JsonResult jsonResult = handleFile2m3u8(mediaFile);
+        /*
+            这里应该发送Mq同步消息，消息发成功后，告诉客人，视频上传生成，正在推流中
+            消费者：消费消息，异步调用handleFile2m3u8 完成推流
+         */
+        boolean success = mediaProducer.sendMessage(mediaFile);//发送Mq消息
         log.info("合并文件耗时 {}" ,System.currentTimeMillis() - startTime);
-        return jsonResult.isSuccess()?JsonResult.success():JsonResult.error();
+        return success?JsonResult.success():JsonResult.error();
     }
 
      /** 文件推流 **/
