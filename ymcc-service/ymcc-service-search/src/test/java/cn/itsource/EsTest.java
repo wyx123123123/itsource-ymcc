@@ -28,10 +28,10 @@ public class EsTest {
 
     @Test
     public void testAdd(){
-        courseEsRepository.save(new CourseDoc(1L,"我是时光鸡"));
+        /*courseEsRepository.save(new CourseDoc(1L,"我是时光鸡"));
 
 
-        System.out.println(courseEsRepository.findById(1L));
+        System.out.println(courseEsRepository.findById(1L));*/
     }
 
 

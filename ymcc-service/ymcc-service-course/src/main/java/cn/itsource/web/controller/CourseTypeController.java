@@ -16,6 +16,7 @@ public class CourseTypeController {
     @Autowired
     public ICourseTypeService courseTypeService;
 
+
     /**
     * 保存和修改公用的
     */

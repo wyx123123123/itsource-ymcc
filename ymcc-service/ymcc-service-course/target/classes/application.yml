@@ -29,7 +29,9 @@ mybatis-plus:
   mapper-locations: classpath:cn/itsource/mapper/*Mapper.xml  # 扫描mapper.xml
 # type-aliases-package: cn.itsource.domain 不用别名效率高
 
-
+feign:
+  sentinel:
+    enabled: true #开启熔断
 
 
 

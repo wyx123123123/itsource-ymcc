@@ -1,15 +1,19 @@
 package cn.itsource.service.impl;
 
+import cn.itsource.doc.CourseDoc;
 import cn.itsource.domain.*;
 import cn.itsource.dto.CourseDto;
 import cn.itsource.enums.GlobalEnumCode;
+import cn.itsource.feign.CourseEsFeignClient;
 import cn.itsource.mapper.CourseMapper;
+import cn.itsource.result.JsonResult;
 import cn.itsource.service.*;
 import cn.itsource.util.AssertUtil;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import io.swagger.models.auth.In;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +56,9 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
 
     @Autowired
     private ICourseTypeService courseTypeService;
+
+    @Autowired
+    private CourseEsFeignClient courseEsFeignClient;
 
 
 
@@ -175,6 +182,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
      * @param courseId
      */
     @Override
+    @Transactional
     public void onLineCourse(Long courseId) {
         // 1.参数校验
         AssertUtil.isNotNull(courseId,"小子想搞事？？ 哥屋恩！！");
@@ -193,7 +201,16 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         //   。为service-search服务编写Controller接口，保存数据到Es中
         //   。编写search-api，讲search服务的controller接口暴露成Feign接口
         //   。service-course服务中使用search-api 去调用search服务，完成数据保存到Es
-
+        CourseDoc courseDoc = new CourseDoc();
+        CourseMarket courseMarket = courseMarketService.selectById(courseId);
+        CourseSummary courseSummary = courseSummaryService.selectById(courseId);
+        BeanUtils.copyProperties(course,courseDoc);
+        BeanUtils.copyProperties(courseMarket,courseDoc);
+        BeanUtils.copyProperties(courseSummary,courseDoc);
+        //处理额外的参数
+        courseDoc.setChargeName(courseMarket.getCharge().intValue() == 1 ? "收费":"免费");
+        JsonResult jsonResult = courseEsFeignClient.saveCourseDoc(courseDoc);
+        AssertUtil.isTrue(jsonResult.isSuccess(),"发布课程失败！！");
     }
 
 

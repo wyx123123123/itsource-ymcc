@@ -1654,7 +1654,7 @@
                     search(){
                         //发送请求到后台获取数据
 						var _this = this;
-                        this.$http.post("search/course/search",this.queryParams)
+                        this.$http.post("search/search/course",this.queryParams)
                             .then(res=>{
                             	console.log(res);
 								_this.datas = res.data.data;
