@@ -1,4 +1,4 @@
-package cn.itsource.feign;
+package cn.itsource;
 
 import cn.itsource.doc.CourseDoc;
 import cn.itsource.result.JsonResult;

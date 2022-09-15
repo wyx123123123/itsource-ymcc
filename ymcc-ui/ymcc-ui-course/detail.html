@@ -1423,7 +1423,7 @@
 
 					play(mediaId){
 						if(mediaId){
-							this.$http.get("/media/mediaFile/getForUser/"+mediaId).then(res=>{
+							this.$http.get("/course/course/getForUser/"+mediaId).then(res=>{
 								if(res.data.success){
 									this.videoInit(res.data.data);
 								}else{

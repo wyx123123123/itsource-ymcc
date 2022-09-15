@@ -18,7 +18,7 @@ public class JsonResult {
     private String code = "1000";
 
     //返回的数据
-    private Object data;
+    private Object data;//  res.data.data
 
     /** 创建当前实例 **/
     public static JsonResult success(){

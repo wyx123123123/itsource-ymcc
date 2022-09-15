@@ -85,6 +85,20 @@ public class CourseEsServiceImpl implements ICourseEsService {
         //设置查询条件给builder
         builder.withQuery(boolQuery);
 
+        //---------设置高亮搜索条件  + 处理高亮结果
+        //builder.withHighlightFields("name");
+
+
+
+        //--------- 设置聚合条件 +  处理聚合结果
+        //builder.addAggregation()
+
+
+
+
+
+
+
         //=================包装查询参数===================
         SearchQuery searchQuery = builder.build();//通过构建器帮我们创建查询对象
         //根据查询条件执行查询

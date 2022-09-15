@@ -1,4 +1,4 @@
-package cn.itsource.feign;
+package cn.itsource;
 
 import cn.itsource.domain.Login;
 import cn.itsource.fallback.UaaFallbackFactory;

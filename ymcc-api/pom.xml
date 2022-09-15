@@ -15,6 +15,7 @@
         <module>ymcc-api-system</module>
         <module>ymcc-api-uaa</module>
         <module>ymcc-api-search</module>
+        <module>ymcc-api-media</module>
     </modules>
 
 

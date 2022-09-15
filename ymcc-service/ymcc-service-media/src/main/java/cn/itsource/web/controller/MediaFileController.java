@@ -5,6 +5,9 @@ import cn.itsource.query.MediaFileQuery;
 import cn.itsource.result.JsonResult;
 import cn.itsource.result.PageList;
 import cn.itsource.service.IMediaFileService;
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +124,7 @@ public class MediaFileController {
    */
     @RequestMapping(value = "/{id}",method = RequestMethod.GET)
     public JsonResult get(@PathVariable("id")Long id){
-        return JsonResult.success(mediaFileService.selectById(id));
+        return JsonResult.success(JSON.toJSONString(mediaFileService.selectById(id)));
     }
 
 
@@ -143,4 +146,18 @@ public class MediaFileController {
         page = mediaFileService.selectPage(page);
         return JsonResult.success(new PageList<MediaFile>(page.getTotal(),page.getRecords()));
     }
+
+    /**
+     * 根据课程ID 查询课程下的所有媒体信息
+     * @param courseId
+     * @return
+     */
+    @RequestMapping(value = "/course/{courseId}",method = RequestMethod.GET)
+    public JsonResult queryMediasByCourserId(@PathVariable("courseId") Long courseId){
+        Wrapper<MediaFile> wrapper = new EntityWrapper<>();
+        wrapper.eq("course_id",courseId);
+        return JsonResult.success(JSON.toJSONString(mediaFileService.selectList(wrapper)));
+    }
+
+
 }

@@ -8,8 +8,7 @@ import cn.itsource.domain.UserBaseInfo;
 import cn.itsource.dto.PhoneRegisterDto;
 import cn.itsource.dto.RedisRegisterDto;
 import cn.itsource.enums.GlobalEnumCode;
-import cn.itsource.exception.GlobalCustomException;
-import cn.itsource.feign.UaaFeignService;
+import cn.itsource.UaaFeignService;
 import cn.itsource.mapper.UserMapper;
 import cn.itsource.result.JsonResult;
 import cn.itsource.service.IUserAccountService;
@@ -24,7 +23,6 @@ import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 

@@ -4,22 +4,26 @@ import cn.itsource.doc.CourseDoc;
 import cn.itsource.domain.*;
 import cn.itsource.dto.CourseDto;
 import cn.itsource.enums.GlobalEnumCode;
-import cn.itsource.feign.CourseEsFeignClient;
+import cn.itsource.CourseEsFeignClient;
+import cn.itsource.feign.MeidaFileFeignClient;
 import cn.itsource.mapper.CourseMapper;
 import cn.itsource.result.JsonResult;
 import cn.itsource.service.*;
 import cn.itsource.util.AssertUtil;
+import cn.itsource.vo.CourseInfoVo;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import io.swagger.models.auth.In;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.querydsl.QuerydslRepositoryInvokerAdapter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -59,6 +63,15 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
 
     @Autowired
     private CourseEsFeignClient courseEsFeignClient;
+
+    @Autowired
+    private ICourseChapterService courseChapterService;
+
+    @Autowired
+    private MeidaFileFeignClient meidaFileFeignClient;
+
+    @Autowired
+    private ICourseUserLearnService courseUserLearnService;
 
 
 
@@ -213,6 +226,113 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         AssertUtil.isTrue(jsonResult.isSuccess(),"发布课程失败！！");
     }
 
+    /**
+     * 查询课程详情
+     * 1.参数校验
+     * 2.业务校验
+     * 3.查询需要的数据
+     *  Course course;// 课程基本信息
+     *  CourseDetail courseDetail;//课程详情
+     *  CourseSummary courseSummary;//课程统计
+     *  CourseMarket courseMarket;//课程销售相关
+     *  List<CourseChapter> courseChapters;//课程章节 ----> 一个章节下面还有多个视屏MediaFile
+     *  List<Teacher> teachers;// 课程老师
+     * 4.封装成 CourseInfoVo 返回给前端
+     * @param courseId  课程ID
+     * @return
+     */
+    @Override
+    public CourseInfoVo courseInfo(Long courseId) {
+        AssertUtil.isNotNull(courseId,"课程Id不能为空！！");
+        Course course = selectById(courseId);
+        AssertUtil.isNotNull(course,"课程不存在！");
+        AssertUtil.isTrue(course.getStatus() == Course.STATUS_ONLINE,"课程状态不是上架状态！！！");
+
+        CourseDetail courseDetail = courseDetailService.selectById(courseId);
+        CourseSummary courseSummary = courseSummaryService.selectById(courseId);
+        CourseMarket courseMarket = courseMarketService.selectById(courseId);
+        //查询老师=======
+        Wrapper<CourseTeacher> ctWrapper = new EntityWrapper<>();
+        ctWrapper.eq("course_id",courseId);
+        List<CourseTeacher> courseTeachers = courseTeacherService.selectList(ctWrapper);
+        // List<CourseTeacher>  --> List<Long> ids
+        List<Long> ids = courseTeachers.stream().map(CourseTeacher::getTeacherId).collect(Collectors.toList());
+        Wrapper<CourseTeacher> teacherWrapper = new EntityWrapper<>();
+        List<Teacher> teachers = teacherService.selectBatchIds(ids);//根据多个老师Id，查询出所有老师
+
+        //查询课程章节======
+        List<CourseChapter> courseChapters = courseChapterService.listByCourseId(courseId);
+        Map<Long, CourseChapter> courseChapterMap = courseChapters.stream()
+                .collect(Collectors.toMap(CourseChapter::getId, courseChapter -> courseChapter));
+
+        //1.为media微服务编写controller接口查询课程下视频
+        //2.编写api-media,暴露Frign接口
+        //3.依赖api-media,使用Feign远程调用查询课程下的视频信息
+        JsonResult jsonResult = meidaFileFeignClient.queryMediasByCourserId(courseId);
+        AssertUtil.isTrue(jsonResult.isSuccess(),"查询媒体信息失败！！");
+        if(jsonResult.getData() != null){//如果数据不为可空我们才处理
+            List<MediaFile> mediaFiles = JSON.parseArray(jsonResult.getData().toString(), MediaFile.class);
+            for (MediaFile mediaFile : mediaFiles) {
+                mediaFile.setFileUrl("");
+                CourseChapter courseChapter = courseChapterMap.get(mediaFile.getChapterId());
+                if(courseChapter != null){
+                    courseChapter.getMediaFiles().add(mediaFile);
+                }
+            }
+        }
+
+        return new CourseInfoVo(
+                course,
+                courseDetail,
+                courseSummary,
+                courseMarket,
+                courseChapters,
+                teachers
+        );
+    }
+
+    /**
+     *
+     * 1.参数校验
+     * 2.通过Fiegn查询媒体信息
+     *   。为media服务编写查询mediaFile的controller接口
+     *   。暴露api-midea
+     *   。course服务使用api-media，调用media服务查询媒体
+     * 3.如果是免费的，就直接返回播放地址
+     * 4.根据mediaFile中的courseId查询当前登录人是否购买了课程
+     *   。购买了并且在客观看有效期，返回地址
+     *   。否则提示：请购买课程后观看
+     * @param mediaId
+     * @return
+     */
+    @Override
+    public String getForUser(Long mediaId) {
+        // 1.参数校验
+        AssertUtil.isNotNull(mediaId,"媒体Id不能为空！");
+        // 2.通过Fiegn查询媒体信息
+        //   。为media服务编写查询mediaFile的controller接口  现成的，代码生成器生成好了
+        //   。暴露api-midea
+        //   。course服务使用api-media，调用media服务查询媒体
+        JsonResult jsonResult = meidaFileFeignClient.get(mediaId);
+        AssertUtil.isTrue(jsonResult.isSuccess(),"媒体查询异常！！");
+        AssertUtil.isNotNull(jsonResult.getData(),"媒体信息不存在！！");
+        MediaFile mediaFile = JSON.parseObject(jsonResult.getData().toString(), MediaFile.class);
+        if(mediaFile.getFree()){
+            return mediaFile.getFileUrl();//免费的直接返回地址
+        }
+        // 3.根据mediaFile中的courseId查询当前登录人是否购买了课程 t_course_user_learn
+        Long loginId = 3L;
+        Wrapper<CourseUserLearn> wrapper = new EntityWrapper<>();
+        wrapper.eq("login_id",loginId);
+        wrapper.eq("course_id",mediaFile.getCourseId());
+        CourseUserLearn courseUserLearn = courseUserLearnService.selectOne(wrapper);
+        //   。否则提示：请购买课程后观看
+        AssertUtil.isNotNull(courseUserLearn,"请购买后再观看！！");
+        //   。购买了并且在客观看有效期，返回地址
+        boolean before = new Date().before(courseUserLearn.getEndTime());
+        AssertUtil.isTrue(before,"课程的可观看时间已经结束，尊贵的会员,请您为课程续费后方可观看！！");
+        return mediaFile.getFileUrl();
+    }
 
 
 }

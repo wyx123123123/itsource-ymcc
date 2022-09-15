@@ -6,6 +6,7 @@ import cn.itsource.domain.Course;
 import cn.itsource.query.CourseQuery;
 import cn.itsource.result.JsonResult;
 import cn.itsource.result.PageList;
+import cn.itsource.vo.CourseInfoVo;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
@@ -20,6 +21,27 @@ public class CourseController {
 
     @Autowired
     public ICourseService courseService;
+
+
+    /**
+     * 检查当前登录人能否观看此视频
+     * @param mediaId
+     * @return
+     */
+    @RequestMapping(value="/getForUser/{mediaId}",method= RequestMethod.GET)
+    public JsonResult getForUser(@PathVariable("mediaId") Long mediaId){
+        String url = courseService.getForUser(mediaId);
+        return JsonResult.success(url);
+    }
+
+    /**
+     * 根据课程ID查询课程详情
+     */
+    @RequestMapping(value="/detail/data/{courseId}",method= RequestMethod.GET)
+    public JsonResult courseInfo(@PathVariable("courseId") Long courseId){
+        CourseInfoVo vo = courseService.courseInfo(courseId);
+        return JsonResult.success(vo);
+    }
 
     /**
      * 发布课程

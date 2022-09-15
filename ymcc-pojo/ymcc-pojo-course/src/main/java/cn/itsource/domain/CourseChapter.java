@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -41,6 +43,21 @@ public class CourseChapter extends Model<CourseChapter> {
     @TableField("course_name")
     private String courseName;
 
+    //当前这个章节对应的视频，数据来自媒体微服务
+    @TableField(exist = false)//数据库中没有这一列，不要去和数据库关联
+    private List<MediaFile> mediaFiles = new ArrayList<>();
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public List<MediaFile> getMediaFiles() {
+        return mediaFiles;
+    }
+
+    public void setMediaFiles(List<MediaFile> mediaFiles) {
+        this.mediaFiles = mediaFiles;
+    }
 
     public Long getId() {
         return id;

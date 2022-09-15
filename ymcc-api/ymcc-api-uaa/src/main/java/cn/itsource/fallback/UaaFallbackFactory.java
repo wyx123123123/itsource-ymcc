@@ -2,7 +2,7 @@ package cn.itsource.fallback;
 
 import cn.itsource.domain.Login;
 import cn.itsource.enums.GlobalEnumCode;
-import cn.itsource.feign.UaaFeignService;
+import cn.itsource.UaaFeignService;
 import cn.itsource.result.JsonResult;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
