@@ -7,5 +7,5 @@ public interface ITokenService {
      * @param courseId
      * @return
      */
-    String createToken(Long courseId);
+    String createToken(String courseId);
 }

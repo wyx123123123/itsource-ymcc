@@ -11,16 +11,18 @@ import cn.itsource.result.JsonResult;
 import cn.itsource.service.*;
 import cn.itsource.util.AssertUtil;
 import cn.itsource.vo.CourseInfoVo;
+import cn.itsource.vo.OrderInfoVo;
+import cn.itsource.vo.OrderItemInfoVo;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.querydsl.QuerydslRepositoryInvokerAdapter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -332,6 +334,48 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         boolean before = new Date().before(courseUserLearn.getEndTime());
         AssertUtil.isTrue(before,"课程的可观看时间已经结束，尊贵的会员,请您为课程续费后方可观看！！");
         return mediaFile.getFileUrl();
+    }
+
+    /**
+     *
+     * 1.参数校验
+     * 2.分隔courseIds
+     * 3.批量查询Course
+     * 4.业务判断
+     *   。状态是否合法
+     *   。course是否为空
+     *   。课程的数量要和传递的课程Id数量一致
+     *
+     * 5.查找课程对应的销售信息
+     * 6.讲课程信息+课程销售信息 封装成小Vo  OrderItemInfo
+     * 7.当所有的小VO封装结束，还要封装大VO OrderInfoVo
+     * @param courseIds  "3,9"
+     * @return
+     */
+    @Override
+    public OrderInfoVo orderInfo(String courseIds) {
+        // 1.参数校验
+        AssertUtil.isNotEmpty(courseIds,"课程Id不能为空");
+        // 2.分隔courseIds
+        String[] courseIdArray = courseIds.split(",");
+        // 3.批量查询Course
+        List<Course> courses = selectBatchIds(Arrays.asList(courseIdArray));
+        // 4.业务判断
+        //   。课程的数量要和传递的课程Id数量一致
+        AssertUtil.isTrue(courseIdArray.length == courses.size(),"课程数量不匹配！！");
+        //   。状态是否合法
+        // 当所有的小VO封装结束，还要封装大VO OrderInfoVo
+        OrderInfoVo orderInfoVo = new OrderInfoVo();
+        for (Course course : courses) {
+            AssertUtil.isTrue(course.getStatus().intValue() == Course.STATUS_ONLINE,"课程状态非法！！！");
+            // 5.查找课程对应的销售信息
+            CourseMarket courseMarket = courseMarketService.selectById(course.getId());
+            // 6.讲课程信息+课程销售信息 封装成小Vo  OrderItemInfo
+            OrderItemInfoVo orderItemInfo = new OrderItemInfoVo(course, courseMarket);
+            orderInfoVo.getCourseInfos().add(orderItemInfo);
+            orderInfoVo.setTotalAmount(orderInfoVo.getTotalAmount().add(courseMarket.getPrice()));
+        }
+        return orderInfoVo;
     }
 
 

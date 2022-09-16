@@ -44,7 +44,8 @@ public class GenteratorCode {
         strategy.setNaming(NamingStrategy.underline_to_camel);// 表名生成策略
 
         strategy.setInclude(new String[]{
-           "t_media_file"
+           "t_course_order",
+           "t_course_order_item"
         }); // 需要生成的表
 
         mpg.setStrategy(strategy);

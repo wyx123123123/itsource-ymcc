@@ -1,0 +1,15 @@
+cn\itsource\mq\consumer\MediaConsumer.class
+cn\itsource\utils\HlsVideoUtil.class
+cn\itsource\utils\PrintStream.class
+cn\itsource\MediaApp.class
+cn\itsource\config\MybatisPlusConfig.class
+cn\itsource\mapper\MediaFileMapper.class
+cn\itsource\mq\producer\MediaProducer.class
+cn\itsource\utils\ConvertVideo.class
+cn\itsource\utils\VideoUtil.class
+cn\itsource\service\impl\MediaFileServiceImpl.class
+cn\itsource\utils\Mp4VideoUtil.class
+cn\itsource\service\IMediaFileService.class
+cn\itsource\web\controller\MediaFileController.class
+cn\itsource\config\Swagger2Config.class
+cn\itsource\config\RedisConfig.class

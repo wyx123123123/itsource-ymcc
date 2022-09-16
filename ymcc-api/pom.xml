@@ -16,6 +16,7 @@
         <module>ymcc-api-uaa</module>
         <module>ymcc-api-search</module>
         <module>ymcc-api-media</module>
+        <module>ymcc-api-course</module>
     </modules>
 
 

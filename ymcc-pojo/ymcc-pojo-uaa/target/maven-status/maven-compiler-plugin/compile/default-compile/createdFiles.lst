@@ -1,0 +1,10 @@
+cn\itsource\query\MenuQuery.class
+cn\itsource\query\LoginQuery.class
+cn\itsource\domain\LoginLog.class
+cn\itsource\query\PermissionQuery.class
+cn\itsource\domain\Login.class
+cn\itsource\query\LoginLogQuery.class
+cn\itsource\domain\Role.class
+cn\itsource\domain\Permission.class
+cn\itsource\domain\Menu.class
+cn\itsource\query\RoleQuery.class

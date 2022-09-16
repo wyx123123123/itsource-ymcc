@@ -23,11 +23,11 @@ public class TokenServiceImpl implements ITokenService {
      *   value: token
      *
      *
-     * @param courseId
+     * @param courseId   9   3,9
      * @return
      */
     @Override
-    public String createToken(Long courseId) {
+    public String createToken(String courseId) {
         //1.参数校验
         AssertUtil.isNotNull(courseId,"课程Id不能为空！！！");
         //2.生成token

@@ -1,0 +1,42 @@
+server:
+  port: 10070
+
+spring:
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password: 123456
+    jedis:
+      pool:
+        max-wait: 2000ms
+        min-idle: 2
+        max-idle: 8
+  application:
+    name: service-order
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  # 配置数据源
+  datasource:
+    username: root
+    password: 111111
+    url: jdbc:mysql:///ymcc-order?serverTimezone=UTC
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource # 指定连接池
+mybatis-plus:
+  mapper-locations: classpath:cn/itsource/mapper/*Mapper.xml  # 扫描mapper.xml
+# type-aliases-package: cn.itsource.domain 不用别名效率高
+
+feign:
+  sentinel:
+    enabled: true
+
+
+
+
+
+
+
+

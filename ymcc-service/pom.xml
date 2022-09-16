@@ -19,6 +19,7 @@
         <module>ymcc-service-course</module>
         <module>ymcc-service-media</module>
         <module>ymcc-service-search</module>
+        <module>ymcc-service-order</module>
     </modules>
 
 

@@ -1,0 +1,4 @@
+cn\itsource\domain\CourseOrder.class
+cn\itsource\domain\CourseOrderItem.class
+cn\itsource\query\CourseOrderItemQuery.class
+cn\itsource\query\CourseOrderQuery.class

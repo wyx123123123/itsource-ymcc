@@ -22,6 +22,13 @@ public class GlobalException {
     }
 
     // 捕捉我们的自定义异常
+    @ExceptionHandler(RuntimeException.class)
+    public JsonResult runtimeExceptionExceptionHandler(RuntimeException e){
+        e.printStackTrace();
+        return JsonResult.error(e.getMessage());
+    }
+
+    // 捕捉我们的自定义异常
     @ExceptionHandler(GlobalCustomException.class)
     public JsonResult globalCustomExceptionHandler(GlobalCustomException e){
         e.printStackTrace();

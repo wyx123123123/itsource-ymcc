@@ -1,0 +1,15 @@
+cn\itsource\query\AccountFlowQuery.class
+cn\itsource\query\UserAccountQuery.class
+cn\itsource\domain\UserAccount.class
+cn\itsource\query\UserQuery.class
+cn\itsource\domain\UserAddress.class
+cn\itsource\domain\UserGrowLog.class
+cn\itsource\query\UserRealInfoQuery.class
+cn\itsource\domain\AccountFlow.class
+cn\itsource\domain\User.class
+cn\itsource\domain\UserBaseInfo.class
+cn\itsource\dto\PhoneRegisterDto.class
+cn\itsource\query\UserAddressQuery.class
+cn\itsource\query\UserBaseInfoQuery.class
+cn\itsource\query\UserGrowLogQuery.class
+cn\itsource\domain\UserRealInfo.class

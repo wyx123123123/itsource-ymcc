@@ -1,0 +1,14 @@
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\web\controller\MediaFileController.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\MediaApp.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\config\MybatisPlusConfig.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\utils\VideoUtil.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\config\Swagger2Config.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\mq\consumer\MediaConsumer.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\utils\HlsVideoUtil.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\utils\Mp4VideoUtil.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\mq\producer\MediaProducer.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\service\impl\MediaFileServiceImpl.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\utils\ConvertVideo.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\service\IMediaFileService.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\config\RedisConfig.java
+D:\workspace\idea-workspace\ymcc0412\ymcc-service\ymcc-service-media\src\main\java\cn\itsource\mapper\MediaFileMapper.java

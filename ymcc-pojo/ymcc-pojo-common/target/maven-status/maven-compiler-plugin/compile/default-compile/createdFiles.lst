@@ -1,0 +1,9 @@
+cn\itsource\domain\MessageSms.class
+cn\itsource\properties\RegisterProperties.class
+cn\itsource\query\MessageSmsQuery.class
+cn\itsource\domain\MessageEmail.class
+cn\itsource\dto\RedisRegisterDto.class
+cn\itsource\constants\RedisRegistConstant.class
+cn\itsource\domain\MessageStation.class
+cn\itsource\query\MessageStationQuery.class
+cn\itsource\query\MessageEmailQuery.class

@@ -3,6 +3,7 @@ package cn.itsource.service;
 import cn.itsource.domain.Course;
 import cn.itsource.dto.CourseDto;
 import cn.itsource.vo.CourseInfoVo;
+import cn.itsource.vo.OrderInfoVo;
 import com.baomidou.mybatisplus.service.IService;
 
 /**
@@ -37,4 +38,11 @@ public interface ICourseService extends IService<Course> {
      * @return
      */
     String getForUser(Long mediaId);
+
+    /**
+     * 查询订单结算页的数据
+     * @param courseIds
+     * @return
+     */
+    OrderInfoVo orderInfo(String courseIds);
 }

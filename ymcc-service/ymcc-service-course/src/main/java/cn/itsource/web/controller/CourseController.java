@@ -7,6 +7,7 @@ import cn.itsource.query.CourseQuery;
 import cn.itsource.result.JsonResult;
 import cn.itsource.result.PageList;
 import cn.itsource.vo.CourseInfoVo;
+import cn.itsource.vo.OrderInfoVo;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
@@ -22,6 +23,16 @@ public class CourseController {
     @Autowired
     public ICourseService courseService;
 
+    /**
+     * 查询出多个课程的相关信息，用来填充订单结算页
+     * @param courseIds
+     * @return
+     */
+    @RequestMapping(value="/info/{courseIds}",method= RequestMethod.GET)
+    public JsonResult orderInfo(@PathVariable("courseIds") String courseIds){
+        OrderInfoVo orderInfo = courseService.orderInfo(courseIds);
+        return JsonResult.success(orderInfo);
+    }
 
     /**
      * 检查当前登录人能否观看此视频

@@ -19,7 +19,7 @@ public class TokenController {
      * @return
      */
     @GetMapping("/createToken/{courseId}")
-    public JsonResult createToken(@PathVariable("courseId") Long courseId){
+    public JsonResult createToken(@PathVariable("courseId") String courseId){
        String token =  tokenService.createToken(courseId);
        return JsonResult.success(token);
 

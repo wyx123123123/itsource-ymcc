@@ -1,0 +1,12 @@
+cn\itsource\domain\Employee.class
+cn\itsource\query\OperationLogQuery.class
+cn\itsource\domain\OperationLog.class
+cn\itsource\query\SystemdictionaryitemQuery.class
+cn\itsource\query\ConfigQuery.class
+cn\itsource\domain\Systemdictionaryitem.class
+cn\itsource\domain\Department.class
+cn\itsource\query\EmployeeQuery.class
+cn\itsource\domain\Systemdictionary.class
+cn\itsource\query\DepartmentQuery.class
+cn\itsource\domain\Config.class
+cn\itsource\query\SystemdictionaryQuery.class

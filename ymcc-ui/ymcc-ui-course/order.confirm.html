@@ -542,7 +542,7 @@
 						orderNo:"",
 						orderForm:{
 							courseIds:[],
-							payType:"1",
+							payType:"1",//支付方式 支付宝
 							type:0,	//0代表普通订单，1代表秒杀订单
 							token:"",
 						}
@@ -556,7 +556,7 @@
 						if(_this.orderForm.courseIds){
 							$("#submitBtn").attr("disabled",true);
 							$("#submitBtn").html("正在下单...");
-							let URI = "placeOrder";
+							let URI = "placeOrder";//普通下单地址
 							let param = {};
 
 							//秒杀下单
@@ -577,7 +577,7 @@
 							//普通请求
 							_this.$http.post("/order/courseOrder/"+URI,param).then(res=>{
 								if(res.data.success){
-									_this.toPay(res.data.data);
+									_this.toPay(res.data.data);//点成功跳到支付
 
 									//是否从购物车跳转过来,删除购物车
 									let fromPage = api.getQueryVariable("from");
@@ -608,7 +608,7 @@
 									//支付完成跳转地址
 									callUrl : "http://course.ymcc.com:6002/detail.html?courseId="+_this.orderForm.courseIds[0]
 								};
-								//TODO : 根据订单号去查询一下支付单号了没有，如果没有好，再延迟3s中，再次查询一下。
+								//TODO : 根据订单号去查询一下支付单号了没有，如果没有好，再延迟1s中，再次查询一下。
 								_this.$http.get("/pay/pay/checkPayOrder/"+orderNo).then(res=>{
 									if(res.data.success){
 										//关闭定时方法
