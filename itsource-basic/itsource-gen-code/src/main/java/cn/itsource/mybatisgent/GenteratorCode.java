@@ -44,8 +44,9 @@ public class GenteratorCode {
         strategy.setNaming(NamingStrategy.underline_to_camel);// 表名生成策略
 
         strategy.setInclude(new String[]{
-           "t_course_order",
-           "t_course_order_item"
+                "t_alipay_info",
+                "t_pay_flow",
+                "t_pay_order"
         }); // 需要生成的表
 
         mpg.setStrategy(strategy);

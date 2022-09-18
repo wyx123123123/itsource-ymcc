@@ -2,12 +2,14 @@ package cn.itsource.domain;
 
 import com.baomidou.mybatisplus.enums.IdType;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -79,6 +81,17 @@ public class CourseOrder extends Model<CourseOrder> {
     @TableField("pay_type")
     private Integer payType;
 
+    //主订单对应的子订单
+    @TableField(exist = false)
+    private List<CourseOrderItem> items = new ArrayList<>();
+
+    public List<CourseOrderItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<CourseOrderItem> items) {
+        this.items = items;
+    }
 
     public Long getId() {
         return id;

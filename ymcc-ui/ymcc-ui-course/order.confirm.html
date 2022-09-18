@@ -605,17 +605,17 @@
 								var param = {
 									orderNo:orderNo,
 									payType: _this.orderForm.payType,
-									//支付完成跳转地址
-									callUrl : "http://course.ymcc.com:6002/detail.html?courseId="+_this.orderForm.courseIds[0]
+									//支付完成浏览器同步跳转地址
+									callUrl : "http://localhost:6002/detail.html?courseId="+_this.orderForm.courseIds[0]
 								};
 								//TODO : 根据订单号去查询一下支付单号了没有，如果没有好，再延迟1s中，再次查询一下。
 								_this.$http.get("/pay/pay/checkPayOrder/"+orderNo).then(res=>{
-									if(res.data.success){
+									if(res.data.success){//如果支付单存在
 										//关闭定时方法
 										window.clearInterval(interval);
-										_this.$http.post("/pay/pay/apply",param).then(res=>{
+										_this.$http.post("/pay/pay/apply",param).then(res=>{//发起支付请求
 											if(res.data.success){
-												document.write(res.data.data); //html
+												document.write(res.data.data); //支付宝相应过来的二维码
 											}else{
 												$.alert(res.data.message);
 												$("#submitBtn").attr("disabled",false);

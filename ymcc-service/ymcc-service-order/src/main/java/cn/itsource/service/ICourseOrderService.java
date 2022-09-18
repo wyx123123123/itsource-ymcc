@@ -19,4 +19,17 @@ public interface ICourseOrderService extends IService<CourseOrder> {
      * @param dto
      */
     String placeOrder(OrderParamDto dto);
+
+    /**
+     * 保存主订单和子订单
+     * @param courseOrder
+     */
+    void saveOrderAndItems(CourseOrder courseOrder);
+
+    /**
+     * 根据订单号查询订单
+     * @param orderNo
+     * @return
+     */
+    CourseOrder selectByOrderNo(String orderNo);
 }

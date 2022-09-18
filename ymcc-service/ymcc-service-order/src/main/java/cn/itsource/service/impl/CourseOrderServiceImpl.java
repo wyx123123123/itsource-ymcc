@@ -4,6 +4,7 @@ import cn.itsource.domain.Course;
 import cn.itsource.domain.CourseMarket;
 import cn.itsource.domain.CourseOrder;
 import cn.itsource.domain.CourseOrderItem;
+import cn.itsource.dto.Order2PayOrderParamDto;
 import cn.itsource.dto.OrderParamDto;
 import cn.itsource.mapper.CourseOrderMapper;
 import cn.itsource.result.JsonResult;
@@ -15,11 +16,20 @@ import cn.itsource.vo.OrderInfoVo;
 import cn.itsource.vo.OrderItemInfoVo;
 import cn.itsource.feign.CourseFeignClient;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import org.apache.commons.lang.StringUtils;
+import org.apache.rocketmq.client.producer.LocalTransactionState;
+import org.apache.rocketmq.client.producer.SendStatus;
+import org.apache.rocketmq.client.producer.TransactionSendResult;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -41,6 +51,9 @@ public class CourseOrderServiceImpl extends ServiceImpl<CourseOrderMapper, Cours
     private CourseFeignClient courseFeignClient;
     @Autowired
     private ICourseOrderItemService courseOrderItemService;
+
+    @Autowired
+    private RocketMQTemplate rocketMqTemplate;
 
     /**
      * 1.参数校验
@@ -101,7 +114,7 @@ public class CourseOrderServiceImpl extends ServiceImpl<CourseOrderMapper, Cours
         order.setUserId(loginId);
         order.setPayType(dto.getPayType());
         // 6.保存数据
-        insert(order);//保存订单
+        //insert(order);//保存订单  交给Mq的事务监听器去保存本地事务
 
         StringBuffer title = new StringBuffer();
         //创建子订单
@@ -119,19 +132,69 @@ public class CourseOrderServiceImpl extends ServiceImpl<CourseOrderMapper, Cours
             item.setCoursePic(course.getPic());
             item.setOrderNo(order.getOrderNo());
             // 6.保存数据
-            courseOrderItemService.insert(item);
+            //courseOrderItemService.insert(item); 交给Mq的事务监听器去保存本地事务
+            order.getItems().add(item);
             title.append(course.getName());
             order.setTotalAmount(order.getTotalAmount().add(courseMarket.getPrice()));//累加子订单的钱钱
         }
         title.append("】订单");
         order.setTitle(title.toString());
-        updateById(order);
+        //updateById(order);  交给Mq的事务监听器去保存本地事务
+        //主订单和子订单都有完整信息了
+        /*
+          message(消息体): 用来生成支付单的参数  订单号 支付金额 支付方式 标题  userId 扩展参数
+          arg(扩展参数): 使用扩展参数，传递主订单和子订单，方便执行本地事务
+         */
+        // =======支付相关===   发送事务消息，让支付服务消费消息保存支付单
+        Order2PayOrderParamDto paramDto = new Order2PayOrderParamDto(
+                order.getTotalAmount(),
+                dto.getPayType(),
+                order.getOrderNo(),
+                loginId,
+                "",//扩展参数
+                order.getTitle()
+        );
+        String jsonString = JSON.toJSONString(paramDto);
+        Message<String> message = MessageBuilder.withPayload(jsonString).build();
+        TransactionSendResult transactionSendResult = rocketMqTemplate.sendMessageInTransaction(
+                "TxOrderGroupListener",
+                "topic-order:tag-order",
+                message,//消息体，我们传递什么？
+                order// 扩展参数，用来干啥
+        );
+        LocalTransactionState localTransactionState = transactionSendResult.getLocalTransactionState();//本地事务的执行状态
+        SendStatus sendStatus = transactionSendResult.getSendStatus();//消息发送状态
+        boolean isSuccess = localTransactionState != LocalTransactionState.COMMIT_MESSAGE || sendStatus != SendStatus.SEND_OK;
+        AssertUtil.isFalse(isSuccess,"下单失败！！！");
+
+
 
         // 7.删除redis中的防重复token
         redisTemplate.delete(key);
-
-        // =======支付相关===
-        // @TODO 支付
         return order.getOrderNo();
+    }
+
+    @Override
+    @Transactional
+    public void saveOrderAndItems(CourseOrder courseOrder) {
+        CourseOrder courseOrderTmp = selectByOrderNo(courseOrder.getOrderNo());
+        AssertUtil.isNull(courseOrderTmp,"订单已经存在！！");
+        //保存主订单
+        insert(courseOrder);
+        //订单ID就有了
+        List<CourseOrderItem> items = courseOrder.getItems();
+        items.forEach(item->{
+            //设置子订单的主订单ID
+            item.setOrderId(courseOrder.getId());
+        });
+        //批量保存子订单
+        courseOrderItemService.insertBatch(items);
+    }
+
+    @Override
+    public CourseOrder selectByOrderNo(String orderNo) {
+        Wrapper<CourseOrder> wrapper = new EntityWrapper<>();
+        wrapper.eq("order_no",orderNo);
+        return selectOne(wrapper);
     }
 }
