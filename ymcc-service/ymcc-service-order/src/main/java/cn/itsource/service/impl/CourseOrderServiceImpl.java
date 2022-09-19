@@ -6,6 +6,7 @@ import cn.itsource.domain.CourseOrder;
 import cn.itsource.domain.CourseOrderItem;
 import cn.itsource.dto.Order2PayOrderParamDto;
 import cn.itsource.dto.OrderParamDto;
+import cn.itsource.dto.PayResultDto;
 import cn.itsource.mapper.CourseOrderMapper;
 import cn.itsource.result.JsonResult;
 import cn.itsource.service.ICourseOrderItemService;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -146,12 +148,16 @@ public class CourseOrderServiceImpl extends ServiceImpl<CourseOrderMapper, Cours
           arg(扩展参数): 使用扩展参数，传递主订单和子订单，方便执行本地事务
          */
         // =======支付相关===   发送事务消息，让支付服务消费消息保存支付单
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("loginId",loginId);
+        map.put("courseIds",courseIdsStr);
+
         Order2PayOrderParamDto paramDto = new Order2PayOrderParamDto(
                 order.getTotalAmount(),
                 dto.getPayType(),
                 order.getOrderNo(),
                 loginId,
-                "",//扩展参数
+                JSON.toJSONString(map),//扩展参数
                 order.getTitle()
         );
         String jsonString = JSON.toJSONString(paramDto);
@@ -196,5 +202,26 @@ public class CourseOrderServiceImpl extends ServiceImpl<CourseOrderMapper, Cours
         Wrapper<CourseOrder> wrapper = new EntityWrapper<>();
         wrapper.eq("order_no",orderNo);
         return selectOne(wrapper);
+    }
+
+    @Override
+    public void payResultHandle(PayResultDto orderDto) {
+        CourseOrder courseOrder = selectByOrderNo(orderDto.getOrderNo());
+        if(courseOrder ==  null){
+            /*
+               兜底：
+                1.重试
+                2.记录日志
+                3.发送各种通知短信，让相关人员知晓，可以人工介入弥补
+             */
+            return;//订单不存在，这个消息你不要给我推了
+        }
+        boolean isWaitePay = courseOrder.getStatusOrder() == CourseOrder.STATE_WAITE_PAY;
+        if(!isWaitePay){
+            return;//订单状态不是待支付，你也不要给我推了
+        }
+        courseOrder.setStatusOrder(CourseOrder.STATE_PAY_SUCCESS);
+        courseOrder.setUpdateTime(new Date());
+        updateById(courseOrder);
     }
 }

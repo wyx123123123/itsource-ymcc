@@ -615,7 +615,7 @@
 										window.clearInterval(interval);
 										_this.$http.post("/pay/pay/apply",param).then(res=>{//发起支付请求
 											if(res.data.success){
-												document.write(res.data.data); //支付宝相应过来的二维码
+												document.write(res.data.data); //支付宝响应过来的二维码
 											}else{
 												$.alert(res.data.message);
 												$("#submitBtn").attr("disabled",false);

@@ -2,6 +2,7 @@ package cn.itsource.service;
 
 import cn.itsource.domain.CourseOrder;
 import cn.itsource.dto.OrderParamDto;
+import cn.itsource.dto.PayResultDto;
 import com.baomidou.mybatisplus.service.IService;
 
 /**
@@ -32,4 +33,10 @@ public interface ICourseOrderService extends IService<CourseOrder> {
      * @return
      */
     CourseOrder selectByOrderNo(String orderNo);
+
+    /**
+     * 处理支付结果
+     * @param orderDto
+     */
+    void payResultHandle(PayResultDto orderDto);
 }
