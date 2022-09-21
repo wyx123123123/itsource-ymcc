@@ -23,9 +23,9 @@
 			</el-table-column>
 			<el-table-column prop="name" label="活动名" width="200" >
 			</el-table-column>
-			<el-table-column prop="beginTimeStr" label="开始时间" sortable>
+			<el-table-column prop="startTime" label="开始时间" sortable>
 			</el-table-column>
-			<el-table-column prop="endTimeStr" label="结束时间" >
+			<el-table-column prop="endTime" label="结束时间" >
 			</el-table-column>
 			<el-table-column prop="timeStr" label="时间段" >
 			</el-table-column>
@@ -56,7 +56,7 @@
 				</el-form-item>
 				<el-form-item label="秒杀时间"  >
 					<el-date-picker  style="width: 290px" prop="beginTime"
-									 v-model="addForm.beginTime"
+									 v-model="addForm.startTime"
 									 type="datetime"
 									 value-format="yyyy-MM-dd HH:mm:ss"
 									 size="small"
@@ -112,7 +112,7 @@
 				//新增界面数据
 				addForm: {
 					name: '',
-					beginTime:"",
+          startTime:"",
 					endTime:""
 				}
 

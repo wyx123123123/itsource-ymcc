@@ -39,4 +39,10 @@ public interface ICourseOrderService extends IService<CourseOrder> {
      * @param orderDto
      */
     void payResultHandle(PayResultDto orderDto);
+
+    /**
+     * 支付超时延迟消息取消订单
+     * @param orderNo
+     */
+    void payTimeOutCancelOrder(String orderNo);
 }

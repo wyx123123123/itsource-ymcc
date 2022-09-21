@@ -15,9 +15,12 @@ import com.alibaba.fastjson.JSON;
 import com.alipay.easysdk.factory.Factory;
 import com.alipay.easysdk.kernel.Config;
 import com.alipay.easysdk.kernel.util.ResponseChecker;
+import com.alipay.easysdk.payment.common.models.AlipayTradeRefundResponse;
 import com.alipay.easysdk.payment.page.models.AlipayTradePagePayResponse;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.sun.media.jfxmedia.logging.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
@@ -34,6 +37,7 @@ import java.util.Map;
  * 统一支付
  */
 @Service
+@Slf4j
 public class PayServiceImpl implements IPayService {
     @Autowired
     private IPayOrderService payOrderService;
@@ -101,6 +105,17 @@ public class PayServiceImpl implements IPayService {
         AssertUtil.isTrue(isEq,"支付金额不匹配！！");
         // 3.根据支付宝的支付状态必须是交易成功，执行下面
         AssertUtil.isTrue(dto.isTradeSuccess(),"支付宝的支付状态不合法！！");
+        if(payOrder.getPayStatus() == PayOrder.STATE_CANCEL){
+           //退款
+            try {
+                Factory.Payment.Common().refund(payOrder.getOrderNo(), payOrder.getAmount().toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("支付宝退款异常！orderNo:{},请检查！！",payOrder.getOrderNo());
+            }
+
+            return "success";
+        }
         // 4.支付服务
         //   。修改支付单状态+时间
         Date now = new Date();
@@ -137,9 +152,7 @@ public class PayServiceImpl implements IPayService {
                 payMap
         );
 
-
-
-        return null;
+        return "success";
     }
 
     public String alipay(PayOrder payOrder,ApplyPayDto dto){

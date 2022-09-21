@@ -27,4 +27,10 @@ public interface IPayOrderService extends IService<PayOrder> {
      * @param payFlow
      */
     void updatePayOrderAndInsertPayFlow(PayOrder payOrder, PayFlow payFlow);
+
+    /**
+     * 取消支付单并关闭支付宝交易
+     * @param orderNo
+     */
+    void payTimeOutCancelOrder(String orderNo);
 }

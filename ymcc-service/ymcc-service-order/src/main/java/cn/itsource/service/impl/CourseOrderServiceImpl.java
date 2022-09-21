@@ -20,8 +20,10 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
+import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.client.producer.TransactionSendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -45,6 +47,7 @@ import java.util.List;
  * @since 2022-09-16
  */
 @Service
+@Slf4j
 public class CourseOrderServiceImpl extends ServiceImpl<CourseOrderMapper, CourseOrder> implements ICourseOrderService {
 
     @Autowired
@@ -174,6 +177,29 @@ public class CourseOrderServiceImpl extends ServiceImpl<CourseOrderMapper, Cours
         AssertUtil.isFalse(isSuccess,"下单失败！！！");
 
 
+        //支付超时取消 延迟消息
+        try {
+            SendResult sendResult = rocketMqTemplate.syncSend(
+                    "topic-paytimeout:tag-paytimeout",
+                    MessageBuilder.withPayload(order.getOrderNo()).build(),
+                    3000,
+                    4// 30秒
+            );
+            boolean isDelayOk = sendResult.getSendStatus() == SendStatus.SEND_OK;
+            if(!isDelayOk){
+                //兜底
+                //1.重试3次
+                //2.记录数据库日志
+                //3.发各种通知信息到代码负责的人，运维人员。。。人工介入操作
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            //兜底
+            //1.重试3次
+            //2.记录数据库日志
+            //3.发各种通知信息到代码负责的人，运维人员。。。人工介入操作
+        }
+
 
         // 7.删除redis中的防重复token
         redisTemplate.delete(key);
@@ -223,5 +249,26 @@ public class CourseOrderServiceImpl extends ServiceImpl<CourseOrderMapper, Cours
         courseOrder.setStatusOrder(CourseOrder.STATE_PAY_SUCCESS);
         courseOrder.setUpdateTime(new Date());
         updateById(courseOrder);
+    }
+
+    @Override
+    public void payTimeOutCancelOrder(String orderNo) {
+        //要做业务幂等性处理  只有是待支付的的订单才能取消
+        //====扩展，可能支付宝已经支付成功了，但是还没有异步同志到我们--主动去查询支付宝
+        /*
+          只要状态是待支付，我就可以放心的取消订单
+          如果后续支付宝有异步支付成功的通知过来了，直接退款。。。  我使用它
+         */
+        CourseOrder order = selectByOrderNo(orderNo);
+        if(order == null){
+            return;//下次不要告诉我了
+        }
+        boolean isWaitPay = order.getStatusOrder() == CourseOrder.STATE_WAITE_PAY;
+        if(!isWaitPay){
+            return;//下次不要告诉我了
+        }
+        log.info("支付超时取消订单{}",orderNo);
+        order.setStatusOrder(CourseOrder.STATE_CANCEL);
+        updateById(order);
     }
 }
