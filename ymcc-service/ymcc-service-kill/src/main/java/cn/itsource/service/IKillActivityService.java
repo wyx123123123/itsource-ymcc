@@ -13,4 +13,9 @@ import com.baomidou.mybatisplus.service.IService;
  */
 public interface IKillActivityService extends IService<KillActivity> {
 
+    /**
+     * 发布活动
+     * @param activityId
+     */
+    void publish(Long activityId);
 }

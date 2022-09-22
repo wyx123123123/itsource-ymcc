@@ -45,4 +45,11 @@ public interface ICourseService extends IService<Course> {
      * @return
      */
     OrderInfoVo orderInfo(String courseIds);
+
+    /**
+     * 查询秒杀订单结算页的数据
+     * @param orderNo
+     * @return
+     */
+    OrderInfoVo oneByOrder(String orderNo);
 }

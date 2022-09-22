@@ -1,6 +1,7 @@
 package cn.itsource.service;
 
 import cn.itsource.domain.CourseOrder;
+import cn.itsource.dto.KillOrderParamDto;
 import cn.itsource.dto.OrderParamDto;
 import cn.itsource.dto.PayResultDto;
 import com.baomidou.mybatisplus.service.IService;
@@ -45,4 +46,11 @@ public interface ICourseOrderService extends IService<CourseOrder> {
      * @param orderNo
      */
     void payTimeOutCancelOrder(String orderNo);
+
+    /**
+     * 秒杀下单
+     * @param dto
+     * @return
+     */
+    String killPlaceOrder(KillOrderParamDto dto);
 }

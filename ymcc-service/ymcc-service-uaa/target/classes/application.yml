@@ -14,7 +14,7 @@ spring:
   # 配置数据源
   datasource:
     username: root
-    password: 111111
+    password: 123456
     url: jdbc:mysql:///ymcc-uaa?serverTimezone=UTC
     driver-class-name: com.mysql.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource # 指定连接池

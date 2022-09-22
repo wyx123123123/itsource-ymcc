@@ -31,8 +31,10 @@
 			</el-table-column>
 			<el-table-column prop="killStatus" label="状态" :formatter="formatStatus" sortable width="80">
 			</el-table-column>
-			<el-table-column label="操作" width="200">
+			<el-table-column label="操作" width="400">
 				<template scope="scope">
+          <el-button size="small" @click="publish( scope.row)" icon="el-icon-edit" type="primary">发布</el-button>
+          <el-button size="small" @click="unPublish( scope.row)" icon="el-icon-edit" type="danger">下架</el-button>
 					<el-button size="small" @click="edit( scope.row)" icon="el-icon-edit" type="primary">编辑</el-button>
 <!--					<el-button size="small" @click="edit( scope.row)" icon="el-icon-edit">取消发布</el-button>-->
 					<el-button type="danger" size="small" @click="del( scope.row)" icon="el-icon-close">删除</el-button>
@@ -119,6 +121,23 @@
 			}
 		},
 		methods: {
+      publish(row){
+        let activityId = row.id;
+        this.$http.post("/kill/killActivity/publish/"+activityId).then(result=>{
+          let {success , data, message ,code} = result.data;
+          if(success){
+            this.$message({ message: "发布成功！", type: 'success' });
+          }else{
+            this.$message({ message: "数据加载失败["+message+"]", type: 'error' });
+          }
+          this.getTableData();
+        }).catch(error => {
+          this.$message({ message: "数据加载失败["+error.message+"]", type: 'error' });
+        })
+      },
+      unPublish(){
+
+      },
 			//start 表格相关============================================================================================
 			selsChange: function (sels) {
 				this.sels = sels;

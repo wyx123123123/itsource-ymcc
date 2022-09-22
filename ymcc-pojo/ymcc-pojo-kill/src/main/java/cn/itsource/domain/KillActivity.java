@@ -20,6 +20,9 @@ import java.io.Serializable;
  */
 @TableName("t_kill_activity")
 public class KillActivity extends Model<KillActivity> {
+    public static final Integer STATE_WAITE_PUBLISH = 0;
+    public static final Integer STATE_PUBLISH = 1;
+    public static final Integer STATE_CANCEL = 2;
 
     private static final long serialVersionUID = 1L;
 

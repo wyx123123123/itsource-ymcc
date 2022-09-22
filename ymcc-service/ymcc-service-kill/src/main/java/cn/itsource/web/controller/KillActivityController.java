@@ -18,6 +18,19 @@ public class KillActivityController {
     @Autowired
     public IKillActivityService killActivityService;
     private SimpleDateFormat format = new SimpleDateFormat("MM-dd HH:mm");
+
+    /**
+     * 发布活动
+     * @param activityId
+     * @return
+     */
+    @RequestMapping(value="/publish/{activityId}",method= RequestMethod.POST)
+    public JsonResult publish(@PathVariable("activityId") Long activityId){
+        killActivityService.publish(activityId);
+        return JsonResult.success();
+    }
+
+
     /**
     * 保存和修改公用的
     */

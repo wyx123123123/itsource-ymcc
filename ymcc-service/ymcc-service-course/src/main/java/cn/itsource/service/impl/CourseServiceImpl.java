@@ -1,5 +1,6 @@
 package cn.itsource.service.impl;
 
+import cn.itsource.PreOrderDto;
 import cn.itsource.doc.CourseDoc;
 import cn.itsource.domain.*;
 import cn.itsource.dto.CourseDto;
@@ -19,6 +20,7 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,6 +76,9 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
 
     @Autowired
     private ICourseUserLearnService courseUserLearnService;
+
+    @Autowired
+    private RedisTemplate<Object,Object> redisTemplate;
 
 
 
@@ -375,6 +380,28 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
             orderInfoVo.getCourseInfos().add(orderItemInfo);
             orderInfoVo.setTotalAmount(orderInfoVo.getTotalAmount().add(courseMarket.getPrice()));
         }
+        return orderInfoVo;
+    }
+
+    @Override
+    public OrderInfoVo oneByOrder(String orderNo) {
+        //查询预创订单
+        Object tmp = redisTemplate.opsForValue().get(orderNo);
+        AssertUtil.isNotNull(tmp,"下单错误，信息不存在！！！");
+        PreOrderDto orderDto = (PreOrderDto)tmp;
+
+        // 3.批量查询Course
+        Course course = selectById(orderDto.getCourseId());
+        // 当所有的小VO封装结束，还要封装大VO OrderInfoVo
+        OrderInfoVo orderInfoVo = new OrderInfoVo();
+        // 5.查找课程对应的销售信息
+        CourseMarket courseMarket = courseMarketService.selectById(course.getId());
+        // 6.讲课程信息+课程销售信息 封装成小Vo  OrderItemInfo
+        courseMarket.setPrice(orderDto.getTotalAmount());
+        OrderItemInfoVo orderItemInfo = new OrderItemInfoVo(course, courseMarket);
+        orderInfoVo.getCourseInfos().add(orderItemInfo);
+        //注意这里：是秒杀的钱钱
+        orderInfoVo.setTotalAmount(orderDto.getTotalAmount());
         return orderInfoVo;
     }
 

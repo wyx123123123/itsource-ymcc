@@ -1,5 +1,6 @@
 package cn.itsource.web.controller;
 
+import cn.itsource.dto.KillOrderParamDto;
 import cn.itsource.dto.OrderParamDto;
 import cn.itsource.service.ICourseOrderService;
 import cn.itsource.domain.CourseOrder;
@@ -18,6 +19,18 @@ public class CourseOrderController {
 
     @Autowired
     public ICourseOrderService courseOrderService;
+
+    /**
+     * 秒杀下单
+     * @param dto
+     * @return
+     */
+    @RequestMapping(value="/killPlaceOrder",method= RequestMethod.POST)
+    public JsonResult killPlaceOrder(@RequestBody @Valid KillOrderParamDto dto){
+        //下单成功需不需要返回值？ 返回什么？
+        String orderNo = courseOrderService.killPlaceOrder(dto);
+        return JsonResult.success(orderNo);
+    }
 
     /**
      * 普通订单下单

@@ -23,6 +23,18 @@ public class CourseController {
     @Autowired
     public ICourseService courseService;
 
+
+    /**
+     * 查询秒杀订单结算页数据
+     * @param orderNo
+     * @return
+     */
+    @RequestMapping(value="/online/oneByOrder/{orderNo}",method= RequestMethod.GET)
+    public JsonResult oneByOrder(@PathVariable("orderNo") String orderNo){
+        OrderInfoVo orderInfo = courseService.oneByOrder(orderNo);
+        return JsonResult.success(orderInfo);
+    }
+
     /**
      * 查询出多个课程的相关信息，用来填充订单结算页
      * @param courseIds

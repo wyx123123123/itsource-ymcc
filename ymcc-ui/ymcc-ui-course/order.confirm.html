@@ -636,7 +636,7 @@
 					},
 					getCourse(){
 						if(this.orderForm.type && this.orderForm.type == 1){
-							this.$http.get("kill/killCourse/online/oneByOrder/"+this.orderNo).then(res=>{
+							this.$http.get("course/course/online/oneByOrder/"+this.orderNo).then(res=>{
 								let {success ,data,message} = res.data;
 								if(success){
 									this.courses = data.courseInfos;

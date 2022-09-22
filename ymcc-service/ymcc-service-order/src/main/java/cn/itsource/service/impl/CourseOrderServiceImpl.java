@@ -1,9 +1,11 @@
 package cn.itsource.service.impl;
 
+import cn.itsource.PreOrderDto;
 import cn.itsource.domain.Course;
 import cn.itsource.domain.CourseMarket;
 import cn.itsource.domain.CourseOrder;
 import cn.itsource.domain.CourseOrderItem;
+import cn.itsource.dto.KillOrderParamDto;
 import cn.itsource.dto.Order2PayOrderParamDto;
 import cn.itsource.dto.OrderParamDto;
 import cn.itsource.dto.PayResultDto;
@@ -270,5 +272,136 @@ public class CourseOrderServiceImpl extends ServiceImpl<CourseOrderMapper, Cours
         log.info("支付超时取消订单{}",orderNo);
         order.setStatusOrder(CourseOrder.STATE_CANCEL);
         updateById(order);
+    }
+
+    @Override
+    public String killPlaceOrder(KillOrderParamDto dto) {
+        // 1.参数校验  JSR303
+        // 2.防重token校验
+
+        //查询预创订单
+        Object tmp = redisTemplate.opsForValue().get(dto.getOrderNo());
+        AssertUtil.isNotNull(tmp,"下单错误，信息不存在！！！");
+        PreOrderDto orderDto = (PreOrderDto)tmp;
+        Long loginId = orderDto.getUserId();
+        //   拼接key从redis获取token
+        String key = "token:"+loginId+":"+orderDto.getCourseId();
+        Object tokenTmp = redisTemplate.opsForValue().get(key);
+        //     获取不到，直接报错
+        AssertUtil.isNotNull(tokenTmp,"token失效，请重新下单");
+        //     获取到了，但是比对值不一致，报错
+        AssertUtil.isEquals(dto.getToken(),tokenTmp.toString(),"骚年，你是不是想搞事！！");
+        // 下单====
+        // 3.查询多个课程 + 销售
+        // 为课程服务编写controller接口 已经写好了，公用 订单结算页渲染接口
+        // 为课程服务编写api-course
+        // 通过feign调用课程服务，获得课程+销售信息
+        JsonResult jsonResult = courseFeignClient.orderInfo(orderDto.getCourseId().toString());
+        AssertUtil.isTrue(jsonResult.isSuccess(),"下单失败！未查询到课程!");
+        Object data = jsonResult.getData();
+        AssertUtil.isNotNull(data,"下单失败！未查询到课程!");
+        String voStr = JSON.toJSONString(data);
+        OrderInfoVo orderInfoVo = JSON.parseObject(voStr, OrderInfoVo.class);
+        List<OrderItemInfoVo> courseInfos = orderInfoVo.getCourseInfos();
+
+        //创建主订单
+        // 5.封装主订单
+
+        CourseOrder order = new CourseOrder();
+        Date now = new Date();
+        order.setCreateTime(now);
+        order.setOrderNo(orderDto.getOrderNo());
+        order.setTotalCount(1);
+        order.setStatusOrder(CourseOrder.STATE_WAITE_PAY);
+        order.setUserId(orderDto.getUserId());
+        order.setPayType(dto.getPayType());
+        order.setTotalAmount(orderDto.getTotalAmount());
+        // 6.保存数据
+        //insert(order);//保存订单  交给Mq的事务监听器去保存本地事务
+
+        StringBuffer title = new StringBuffer();
+        //创建子订单
+        title.append("课程：【");
+        for (OrderItemInfoVo courseInfo : courseInfos) {
+            Course course = courseInfo.getCourse();
+            CourseOrderItem item = new CourseOrderItem();
+            item.setOrderId(order.getId());
+            item.setAmount(orderDto.getTotalAmount());
+            item.setCount(1);
+            item.setCreateTime(now);
+            item.setCourseId(course.getId());
+            item.setCourseName(course.getName());
+            item.setCoursePic(course.getPic());
+            item.setOrderNo(order.getOrderNo());
+            // 6.保存数据
+            //courseOrderItemService.insert(item); 交给Mq的事务监听器去保存本地事务
+            order.getItems().add(item);
+            title.append(course.getName());
+        }
+        title.append("】订单");
+        order.setTitle(title.toString());
+        //updateById(order);  交给Mq的事务监听器去保存本地事务
+        //主订单和子订单都有完整信息了
+        /*
+          message(消息体): 用来生成支付单的参数  订单号 支付金额 支付方式 标题  userId 扩展参数
+          arg(扩展参数): 使用扩展参数，传递主订单和子订单，方便执行本地事务
+         */
+        // =======支付相关===   发送事务消息，让支付服务消费消息保存支付单
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("loginId",loginId);
+        map.put("courseIds",orderDto.getCourseId());
+
+        Order2PayOrderParamDto paramDto = new Order2PayOrderParamDto(
+                order.getTotalAmount(),
+                dto.getPayType(),
+                order.getOrderNo(),
+                loginId,
+                JSON.toJSONString(map),//扩展参数
+                order.getTitle()
+        );
+
+        String jsonString = JSON.toJSONString(paramDto);
+        Message<String> message = MessageBuilder.withPayload(jsonString).build();
+        TransactionSendResult transactionSendResult = rocketMqTemplate.sendMessageInTransaction(
+                "TxOrderGroupListener",
+                "topic-order:tag-order",
+                message,//消息体，我们传递什么？
+                order// 扩展参数，用来干啥
+        );
+        LocalTransactionState localTransactionState = transactionSendResult.getLocalTransactionState();//本地事务的执行状态
+        SendStatus sendStatus = transactionSendResult.getSendStatus();//消息发送状态
+        boolean isSuccess = localTransactionState != LocalTransactionState.COMMIT_MESSAGE || sendStatus != SendStatus.SEND_OK;
+        AssertUtil.isFalse(isSuccess,"下单失败！！！");
+
+
+        //支付超时取消 延迟消息
+        try {
+            SendResult sendResult = rocketMqTemplate.syncSend(
+                    "topic-paytimeout:tag-paytimeout",
+                    MessageBuilder.withPayload(order.getOrderNo()).build(),
+                    3000,
+                    4// 30秒
+            );
+            boolean isDelayOk = sendResult.getSendStatus() == SendStatus.SEND_OK;
+            if(!isDelayOk){
+                //兜底
+                //1.重试3次
+                //2.记录数据库日志
+                //3.发各种通知信息到代码负责的人，运维人员。。。人工介入操作
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            //兜底
+            //1.重试3次
+            //2.记录数据库日志
+            //3.发各种通知信息到代码负责的人，运维人员。。。人工介入操作
+        }
+        // 7.删除redis中的防重复token
+        redisTemplate.delete(key);
+
+        //8.删除预创单
+        redisTemplate.delete(dto.getOrderNo());
+
+        return order.getOrderNo();
     }
 }

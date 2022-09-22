@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.io.Serializable;
 
@@ -99,6 +100,62 @@ public class KillCourse extends Model<KillCourse> {
     private Long activityId;
     @TableField("time_str")
     private String timeStr;
+
+
+    /**
+     * 返回时间差
+     *  如果是未开始：startTime - now
+     *  如果是秒杀中：endTime - now
+     *
+     * @return
+     */
+    public Long getTimeDiffMill(){
+        Date now = new Date();
+        if(isKilling()){
+            //秒杀中
+            return getEndTime().getTime() - now.getTime();
+        }
+        if(now.before(getStartTime())){
+            //秒杀未开始
+            return getStartTime().getTime() - now.getTime();
+        }
+        return null;
+    }
+
+
+    public Boolean isUnbegin(){
+        Date now = new Date();
+        if(now.after(getStartTime())){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 秒杀中，返回true
+     * @return
+     */
+    public Boolean isKilling(){
+        Date now = new Date();
+        if(now.after(getStartTime()) && now.before(getEndTime())){
+            return true;
+        }
+        return false;
+    }
+
+    /*
+      返回秒杀状态名字
+     */
+    public String getKillStatusName() {
+        Date now = new Date();
+        if(now.before(getStartTime())){
+            return "未开始";
+        }else if(now.after(getEndTime())){
+            return "已结束";
+        }else{
+            return "秒杀中";
+        }
+    }
 
 
     public Long getId() {
