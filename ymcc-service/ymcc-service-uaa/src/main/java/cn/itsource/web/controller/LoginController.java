@@ -7,6 +7,7 @@ import cn.itsource.result.JsonResult;
 import cn.itsource.result.PageList;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,6 +16,13 @@ public class LoginController {
 
     @Autowired
     public ILoginService loginService;
+
+    //登录成功后重定向地址
+    @RequestMapping("/loginSuccess")
+    @ResponseBody
+    public String loginSuccess(){
+        return "登录成功";
+    }
 
     /**
     * 保存和修改公用的
@@ -33,7 +41,8 @@ public class LoginController {
     /**
     * 删除对象
     */
-    @RequestMapping(value="/{id}",method=RequestMethod.DELETE)
+    @PreAuthorize("hasAuthority('delete:id')")
+    @RequestMapping(value="/delete/{id}",method=RequestMethod.DELETE)
     public JsonResult delete(@PathVariable("id") Long id){
         loginService.deleteById(id);
         return JsonResult.success();
@@ -42,6 +51,7 @@ public class LoginController {
     /**
    * 获取对象
    */
+    @PreAuthorize("hasAuthority('get:id')")
     @RequestMapping(value = "/{id}",method = RequestMethod.GET)
     public JsonResult get(@PathVariable("id")Long id){
         return JsonResult.success(loginService.selectById(id));
@@ -51,6 +61,7 @@ public class LoginController {
     /**
     * 查询所有对象
     */
+    @PreAuthorize("hasAuthority('login:list')")
     @RequestMapping(value = "/list",method = RequestMethod.GET)
     public JsonResult list(){
         return JsonResult.success(loginService.selectList(null));

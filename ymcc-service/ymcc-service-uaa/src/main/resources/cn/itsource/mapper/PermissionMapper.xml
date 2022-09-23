@@ -12,4 +12,20 @@
         <result column="sn" property="sn" />
     </resultMap>
 
+    <select id="loadPermisisonsByLoginId" resultMap="BaseResultMap">
+        SELECT
+            p.id,
+            p.name,
+            p.resource,
+            p.state,
+            p.menu_id,
+            p.sn
+        FROM
+            t_login_role lr
+            JOIN t_role_permission rp ON lr.role_id = rp.role_id
+            JOIN t_permission p ON rp.permission_id = p.id
+        WHERE
+            lr.login_id = #{loginId}
+    </select>
+
 </mapper>
